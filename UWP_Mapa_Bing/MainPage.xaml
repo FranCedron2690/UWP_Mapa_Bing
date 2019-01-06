@@ -50,7 +50,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Margin="25,15,0,0">
-                
+
                 <TextBlock 
                     Text="Origen" 
                     VerticalAlignment="Center"
@@ -85,7 +85,7 @@
                     Margin="0,0,25,0"
                     PlaceholderText="Introduce una dirección...."
                     Width="450"/>
-                
+
             </StackPanel>
 
             <StackPanel x:Name="Panel_But_calcular_ruta"
@@ -94,21 +94,42 @@
                         VerticalAlignment="Center"
                         Margin="0,30,0,0">
 
-                <CheckBox Content="Coche" 
-                          HorizontalAlignment="Left" 
-                          Margin="0,0,10,0" 
-                          VerticalAlignment="Center"/>
-                <CheckBox Content="Andar" 
-                          HorizontalAlignment="Left" 
-                          Margin="0,0,10,0" 
-                          VerticalAlignment="Center"
-                          Click=""/>
+                <ToggleSwitch x:Name="toggle_Desplazamiento"
+                              Header="Andar/Coche"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Top"
+                              IsOn="True"/>
 
-                <Button
-                    Content="Calcular Ruta"
-                    Click="click_CalcularRuta"/>    
+                <ComboBox  x:Name="ColorsCombo" 
+                           Header="Colores Ruta" 
+                           Height="55" 
+                           Width="117" 
+                           DisplayMemberPath="Source"
+                           Margin="0,0,30,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <ComboBoxItem>
+                        <Rectangle Fill="Blue" Height="25" Width="60"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Fill="Red" Height="25" Width="60"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Fill="Orange" Height="25" Width="60"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Fill="Yellow" Height="25" Width="60"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem>
+                        <Rectangle Fill="White" Height="25" Width="60"/>
+                    </ComboBoxItem>
+                </ComboBox>
+
+                <Button Content="Calcular Ruta"
+                        Click="click_CalcularRuta"
+                        FontWeight="Black"
+                        Height="55"/>
 
             </StackPanel>
+
 
         </StackPanel>
         <StackPanel x:Name="Panel_Botones" 
@@ -118,11 +139,18 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Height="250">
-           
-        </StackPanel>
-        <!--FIN Panel de Rutas-->
-        
-        <!--<Button Content="3D Map"
+
+            <Button Content="2D Map"
+                Grid.Row="1" Grid.Column="0"
+                    Name="butMapaNormal"
+                    Click="click_MapaNormal"
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    RenderTransformOrigin="-0.767,-0.239" 
+                    Height="56" 
+                    Width="153" Margin="0,0,0,10"/>
+
+            <Button Content="3D Map"
                 Grid.Row="1" Grid.Column="0"
                     Name="butTresD"
                     Click="map_tresD"
@@ -130,35 +158,21 @@
                     VerticalAlignment="Top" 
                     RenderTransformOrigin="-0.767,-0.239" 
                     Height="56" 
-                    Width="88" Margin="0,116,0,0"/>
-        <Button Content="Map StreetView"
+                    Width="153" Margin="0,0,0,10"/>
+
+            <Button Content="Map StreetView"
                 Grid.Row="1" Grid.Column="0"
                     Name="butStreetView"
-                    Click="showStreetsideView"
+                    Click="click_StretView"
                     HorizontalAlignment="Left" 
                     VerticalAlignment="Top" 
                     RenderTransformOrigin="-0.767,-0.239"
                     Height="56" 
-                    Width="153" Margin="234,116,0,0"/>
+                    Width="153" />
 
-        <Button Content="calcular Ruta" 
-                Grid.Row="1" Grid.Column="0"
-                    Name="calcularRuta"
-                    Click="click_CalcularRuta"
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="153" Margin="869,116,0,0"/>
-        <Button Content="Geocode" 
-                Grid.Row="1" Grid.Column="0"
-                    Name="geocodeButton"
-                    Click="geocodeButton_Click"
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="153" Margin="550,116,0,0"/>-->
+        </StackPanel>
+        <!--FIN Panel de Rutas-->
+
         <TextBox Name="TextIndicacionesRuta"
                    Grid.Row="0" Grid.Column="1"
                      TextWrapping="Wrap"
@@ -169,69 +183,4 @@
                      Width="344"/>
 
     </Grid>
-
-    <!--<Grid>
-
-        <Grid x:Name="pageGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-            <Custom:MapControl 
-                x:Name="MapControl"            
-                ZoomInteractionMode="GestureAndControl"
-                TiltInteractionMode="GestureAndControl"   
-                MapServiceToken="3olqm1EArTc5QM5ZXJZi~qTex8D7Z-XjetI_vCB0PJA~AgruuIxhe2z24jht0OfXglsJQN_Oe9-FtPHeaMFAOpWqjfFsHRMjlYR1-2deqKiX"
-                HorizontalAlignment="Left" 
-                Margin="0,0,0,0" 
-                VerticalAlignment="Top" 
-                Height="906" 
-                Width="1084">
-
-            </Custom:MapControl>
-            <Button Content="3D Map" 
-                    Name="butTresD"
-                    Click="map_tresD"
-                    HorizontalAlignment="Left" 
-                    Margin="281,934,0,0" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="88"/>
-            <Button Content="Map StreetView" 
-                    Name="butStreetView"
-                    Click="showStreetsideView"
-                    HorizontalAlignment="Left" 
-                    Margin="502,934,0,0" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="153"/>
-
-            <Button Content="calcular Ruta" 
-                    Name="calcularRuta"
-                    Click="click_CalcularRuta"
-                    HorizontalAlignment="Left" 
-                    Margin="750,934,0,0" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="153"/>
-            <Button Content="Geocode" 
-                    Name="geocodeButton"
-                    Click="geocodeButton_Click"
-                    HorizontalAlignment="Left" 
-                    Margin="997,934,0,0" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="153"/>
-            <TextBox Name="textIndicacionesRuta"
-                     TextWrapping="Wrap"
-                     HorizontalAlignment="Left" 
-                     Margin="1156,0,0,0"
-                     VerticalAlignment="Top" 
-                     Height="906" 
-                     Width="344"/>
-
-
-        </Grid>
-
-    </Grid>-->
 </Page>
