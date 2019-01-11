@@ -19,6 +19,8 @@
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
+        
+        <!--Mapa que se adapta a la celda del grid en el que está-->
         <Custom:MapControl 
             Grid.Row="0" Grid.Column="0"
                 x:Name="MapControl"            
@@ -29,6 +31,8 @@
                 Width="1100"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"/>
+        <!---->
+        
         <!--Panel de Rutas-->
         <StackPanel x:Name="Panel_Rutas"
                     Orientation="Vertical"
@@ -127,50 +131,10 @@
                         Click="click_CalcularRuta"
                         FontWeight="Black"
                         Height="55"/>
-
             </StackPanel>
-
-
         </StackPanel>
-        <StackPanel x:Name="Panel_Botones" 
-                    BorderBrush="Black"
-                    BorderThickness="2"
-                    Grid.Column="1" Grid.Row="1"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Height="250">
+        <!---->
 
-            <Button Content="2D Map"
-                Grid.Row="1" Grid.Column="0"
-                    Name="butMapaNormal"
-                    Click="click_MapaNormal"
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="153" Margin="0,0,0,10"/>
-
-            <Button Content="3D Map"
-                Grid.Row="1" Grid.Column="0"
-                    Name="butTresD"
-                    Click="map_tresD"
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239" 
-                    Height="56" 
-                    Width="153" Margin="0,0,0,10"/>
-
-            <Button Content="Map StreetView"
-                Grid.Row="1" Grid.Column="0"
-                    Name="butStreetView"
-                    Click="click_StretView"
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.767,-0.239"
-                    Height="56" 
-                    Width="153" />
-
-        </StackPanel>
         <!--FIN Panel de Rutas-->
         <StackPanel x:Name="Panel_Info_Ruta" Grid.Row="0" Grid.Column="1">
             <TextBox Text="Información de la Ruta"  
@@ -187,5 +151,51 @@
                          Height="700" 
                          Width="344"/>
         </StackPanel>
+        <!---->
+
+        <!--Panel de Botones con las vistas del Mapa-->
+        <StackPanel x:Name="Panel_Botones" 
+                    Margin="15,35,0,0"
+                    Orientation="Vertical"
+                    BorderBrush="Black"
+                    Grid.Column="1" Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Stretch">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ComboBox x:Name="combo2d" ItemsSource="{x:Bind mapas2d}"/>
+                <Button Content="2D Map"
+                    Name="butMapaNormal"
+                    Click="click_MapaNormal"
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    RenderTransformOrigin="-0.767,-0.239" 
+                    Height="40" 
+                    Width="95" Margin="40,0,0,10"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ComboBox x:Name="combo3d"  ItemsSource="{x:Bind mapas3d}"/>
+                <Button Content="3D Map"
+                    Name="butTresD"
+                    Click="map_tresD"
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    RenderTransformOrigin="-0.767,-0.239" 
+                    Height="40" 
+                    Width="95" Margin="40,0,0,10"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Map StreetView"
+                    Name="butStreetView"
+                    Click="click_StretView"
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top" 
+                    RenderTransformOrigin="-0.767,-0.239"
+                    Height="40" 
+                    Width="153" />
+            </StackPanel>
+        </StackPanel>
+        <!---->
     </Grid>
 </Page>

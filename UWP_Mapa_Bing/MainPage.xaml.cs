@@ -32,16 +32,28 @@ namespace UWP_Mapa_Bing
         Color[] colors = { Colors.Blue, Colors.Red , Colors.Orange , Colors.Yellow , Colors.White };
         String[] maps2D = { "Aerial" , "RoadDark", "RoadLight" };
         String[] maps3D = { "Aerial3DWithRoads","Road","Terrain" };
+        MapStyle[] estilos3DMapa = { MapStyle.Aerial3DWithRoads, MapStyle.Road, MapStyle.Terrain };
+
+        ObservableCollection<String> mapas2d = new ObservableCollection<String>();
+        ObservableCollection<String> mapas3d = new ObservableCollection<String>();
 
         public MainPage()
         {
             this.InitializeComponent();
 
-            MapControl.StyleSheet = MapStyleSheet.RoadDark();//Apariencia del Mapa. Por lo que dice la documentación, se pueden personalizar los colores
-                                                             //de cada tipo de apariencia del mapa, para poder cambiarlos y crear nuestras propias apariencias https://docs.microsoft.com/en-us/windows/uwp/maps-and-location/elements-of-map-style-sheet
+            ColorsCombo.SelectedIndex = 1;//Establezco el color inicial a Rojo
 
-            ColorsCombo.SelectedIndex = 1;
+            //Añado los Items de los combos de los mapas 2D y 3D
+            foreach (String data in maps2D)
+            {
+                mapas2d.Add(data);
+            }
 
+            foreach (String data in maps3D)
+            {
+                mapas3d.Add(data);
+            }
+           
             /*Antes de que su aplicación pueda acceder a la ubicación del usuario, debe llamar al método RequestAccessAsync.
              * En ese momento, su aplicación debe estar en primer plano y se debe llamar a RequestAccessAsync desde el subproceso 
              * de la interfaz de usuario. Hasta que el usuario otorgue el permiso de su aplicación a su ubicación, esta no podrá 
@@ -53,9 +65,21 @@ namespace UWP_Mapa_Bing
             // Set your current location.
 
             currentLocation();
-            this.SizeChanged += MainPage_SizeChanged;
+            this.SizeChanged += MainPage_SizeChanged;//evento lanzado cuando la pantalla cambia de tamaño
+            this.Loaded += Page_Loaded;//evento lanzado cuando la pantalla ha sido cargada (posterior a la función Main)
         }
 
+        #region Eventos
+        //Evento llamado cuando la pantalla ha sido cargada. Lo uso para establecer el Index de los los combos de los mapas, ya que al añadir sus items del combo en la función Main, no se puede establecer
+        //su index en ella porque su valor aun es null. Por ello, los establezco en esta función, que es llamada posteriormente
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            //Estilo del mapa inicial 2d, correspondiente al index 1 de combo2d
+            MapControl.StyleSheet = MapStyleSheet.RoadDark();//Apariencia del Mapa. Por lo que dice la documentación, se pueden personalizar los colores
+                                                             //de cada tipo de apariencia del mapa, para poder cambiarlos y crear nuestras propias apariencias https://docs.microsoft.com/en-us/windows/uwp/maps-and-location/elements-of-map-style-sheet
+            combo2d.SelectedIndex = 1;
+            combo3d.SelectedIndex = 0;
+        }
 
         //Evento que controla el tamaño de la pantalla, para redimensionar los elementos que hay en ella. Como la App está diseñada para Tablets en modo Landscape, no controlo otras resoluciones. Pero si quisiera
         //ver la App con otros diseñis sin cargar otra Page, podríamos usar este evento para cargar diferentes VisualState u otras elementos que permitan mostrar
@@ -79,7 +103,9 @@ namespace UWP_Mapa_Bing
             MapControl.Width = (width / 3) * 2;
             MapControl.Height = (height / 4) * 3;
         }
+        #endregion
 
+        #region Posicion Inicial
         private async void currentLocation()
         {
             var accessStatus = await Geolocator.RequestAccessAsync();
@@ -93,20 +119,7 @@ namespace UWP_Mapa_Bing
                     Geoposition pos = await geolocator.GetGeopositionAsync();
                     miPosiciónActual = pos.Coordinate.Point;
 
-                    // Reverse geocode the specified geographic location.
-                    MapLocationFinderResult result =
-                          await MapLocationFinder.FindLocationsAtAsync(miPosiciónActual);
-
-                    // If the query returns results, display the name of the town
-                    // contained in the address of the first result.
-                    if (result.Status == MapLocationFinderStatus.Success)
-                    {
-                        Debug.WriteLine( "Ciudad " + result.Locations[0].Address.Town + ", Calle " + result.Locations[0].Address.Street + " Portal " + result.Locations[0].Address.StreetNumber);
-                    }
-
-                    Debug.WriteLine("Altitud: " + miPosiciónActual.Position.Altitude + ", Latitud " + miPosiciónActual.Position.Latitude);
-
-                    // Set the map location.
+                    // Coloco el mapa en la posición del usuario, y establezco sus valores iniciales
                     MapControl.Center = miPosiciónActual;
                     MapControl.ZoomLevel = 12;//20 lo mas cercano, 1 lo mas alejado
                     MapControl.Heading = 0;//de 0 a 360 la rotación circular del mapa
@@ -148,59 +161,60 @@ namespace UWP_Mapa_Bing
                     break;
 
                 case GeolocationAccessStatus.Denied:
-                    //Para que pueda acceder a la Localización, en el dispositvo activar la Localización/Ubicación en la Configuración de Privacidad
+                    // Si entra aquí, para que pueda acceder a la Localización, en el dispositvo hay que activar la Localización/Ubicación en la Configuración de Privacidad
                     Debug.Write("Acceso denegado a Geolocator");
-                    // Handle the case  if access to location is denied.
                     break;
 
                 case GeolocationAccessStatus.Unspecified:
-                    Debug.Write("Unespecificado Geolocator");
-                    // Handle the case if  an unspecified error occurs.
+                    Debug.Write("Geolocator unespecificado");
                     break;
             }
         }
+        #endregion
 
+        #region Visualización de los Mapas
+        //Función para visualizar el StreetView
         private async void click_StretView (object sender, RoutedEventArgs e)
         {
-            // Check if Streetside is supported.
+            // Comprobación de si el dispositivo soporta Streetside
             if (MapControl.IsStreetsideSupported)
             {
                 StreetsidePanorama panoramaNearCity = await StreetsidePanorama.FindNearbyAsync(miPosiciónActual);
 
-                // Set the Streetside view if a panorama exists.
+                // Si el panorama existe, se crea el StreetView y se establece en el mapa para ser visualizado
                 if (panoramaNearCity != null)
                 {
-                    // Create the Streetside view.
-                    StreetsideExperience ssView = new StreetsideExperience(panoramaNearCity);
-                    ssView.OverviewMapVisible = true;
-                    MapControl.CustomExperience = ssView;
+                    StreetsideExperience stretView = new StreetsideExperience(panoramaNearCity);
+                    stretView.OverviewMapVisible = true;
+                    MapControl.CustomExperience = stretView;
                 }
             }
             else
             {
-                // If Streetside is not supported
+                // Si el dispositivo no soporta Streetside, aparece el siguiente mensaje de dialogo
                 ContentDialog viewNotSupportedDialog = new ContentDialog()
                 {
-                    Title = "Streetside is not supported",
-                    Content = "\nStreetside views are not supported on this device.",
+                    Title = "StretView no soportado",
+                    Content = "La vista StretView no es soportada en tu dispositvo.",
                     PrimaryButtonText = "OK"
                 };
                 await viewNotSupportedDialog.ShowAsync();
             }
         }
 
+        //Función que establece el mapa con mapas 3D según el valor de su combo
         private async void map_tresD (object sender, RoutedEventArgs e)
         {
             if (MapControl.Is3DSupported)
             {
-                // Set the aerial 3D view.
-                MapControl.Style = MapStyle.Aerial3DWithRoads;
+                // Se establece el mapa mediante el valor actual del combo3D
+                MapControl.Style = estilos3DMapa[combo3d.SelectedIndex];
 
                 // Se crea la escena del Mapa 3D
                 MapScene hwScene = MapScene.CreateFromLocationAndRadius(miPosiciónActual,
-                                                                                     80, /* show this many meters around */
-                                                                                     0, /* looking at it to the North*/
-                                                                                     60 /* degrees pitch */);
+                                                                                     80, // cuantos metros se ve alrededor
+                                                                                     0, //grados con respecto al Norte
+                                                                                     60); //inclinación del mapa
                 // Se establece la animación con la que aparecerá el mapa 3D
                 await MapControl.TrySetSceneAsync(hwScene, MapAnimationKind.Linear);
             }
@@ -217,85 +231,106 @@ namespace UWP_Mapa_Bing
             }
         }
 
+        //Función que establece el mapa con mapas 2D según el valor de su combo
         private void click_MapaNormal(object sender, RoutedEventArgs e)
         {
-            MapControl.StyleSheet = MapStyleSheet.RoadDark();
+            switch (combo2d.SelectedIndex)
+            {
+                case 0:
+                    MapControl.StyleSheet = MapStyleSheet.Aerial();
+                    break;
+                case 1:
+                    MapControl.StyleSheet = MapStyleSheet.RoadDark();
+                    break;
+                case 2:
+                    MapControl.StyleSheet = MapStyleSheet.RoadLight();
+                    break;
+            }
         }
+        #endregion
 
-            private async void click_CalcularRuta(object sender, RoutedEventArgs e)
+        #region Calculo de la ruta
+        private async void click_CalcularRuta(object sender, RoutedEventArgs e)
         {
             if (text_Origen.Text != "" && text_Destino.Text != "")
             {
-                // Obtenemos la dirección inicial mediante Geocode
-                BasicGeoposition startLocation = await geocodeButton(text_Origen.Text);
-
-                // Obtenemos la dirección destino mediante Geocode
-                BasicGeoposition endLocation = await geocodeButton(text_Destino.Text);
-
-                MapRouteFinderResult routeResult = null;
-
-                if (toggle_Desplazamiento.IsOn == true)
+                try
                 {
-                    // Para conseguir la ruta entre 2 destinos especificados Coche
-                    routeResult = await MapRouteFinder.GetDrivingRouteAsync(
-                                  new Geopoint(startLocation),
-                                  new Geopoint(endLocation),
-                                  MapRouteOptimization.Time,
-                                  MapRouteRestrictions.None);
-                }
-                else
-                {
-                    // Para conseguir la ruta entre 2 destinos especificados Andando. Suele Fallar
-                    routeResult = await MapRouteFinder.GetWalkingRouteAsync(
-                                  new Geopoint(startLocation),
-                                  new Geopoint(endLocation));
-                }
+                    // Obtenemos la dirección inicial mediante Geocode
+                    BasicGeoposition startLocation = await geocodeDireccion(text_Origen.Text);
 
+                    // Obtenemos la dirección destino mediante Geocode
+                    BasicGeoposition endLocation = await geocodeDireccion(text_Destino.Text);
 
+                    MapRouteFinderResult routeResult = null;
 
-                if (routeResult.Status == MapRouteFinderStatus.Success)
-                {
-                    System.Text.StringBuilder routeInfo = new System.Text.StringBuilder();
-
-                    // Se muestra la información obtenida de la ruta
-                    routeInfo.Append("\nTiempo en minutos = " + routeResult.Route.EstimatedDuration.TotalMinutes.ToString());
-                    routeInfo.Append("\nTotal Km = " + (routeResult.Route.LengthInMeters / 1000).ToString());
-
-                    // Se muestra las direcciones de la ruta
-                    routeInfo.Append("\n\nDIRECCIONES\n");
-
-                    foreach (MapRouteLeg leg in routeResult.Route.Legs)
+                    if (toggle_Desplazamiento.IsOn == true)
                     {
-                        foreach (MapRouteManeuver maneuver in leg.Maneuvers)
-                        {
-                            routeInfo.AppendLine(maneuver.InstructionText);
-                            Debug.WriteLine(maneuver.InstructionText);
-                        }
+                        // Para conseguir la ruta entre 2 destinos especificados Coche
+                        routeResult = await MapRouteFinder.GetDrivingRouteAsync(
+                                      new Geopoint(startLocation),
+                                      new Geopoint(endLocation),
+                                      MapRouteOptimization.Time,
+                                      MapRouteRestrictions.None);
+                    }
+                    else
+                    {
+                        // Para conseguir la ruta entre 2 destinos especificados Andando. Suele Fallar
+                        routeResult = await MapRouteFinder.GetWalkingRouteAsync(
+                                      new Geopoint(startLocation),
+                                      new Geopoint(endLocation));
                     }
 
-                    // Mostramos la información de la ruta en el Texto asignado para ver las indicaciones de la ruta
-                    TextIndicacionesRuta.Text = routeInfo.ToString();
 
-                    // Usamos la ruta para inicializar MapRouteView
-                    MapRouteView viewOfRoute = new MapRouteView(routeResult.Route);
-                    viewOfRoute.RouteColor = colors[ColorsCombo.SelectedIndex];
-                    viewOfRoute.OutlineColor = Colors.Red;
 
-                    // Añadimos el nuevo MapRouteView a las rutas del Mapa
-                    if (MapControl.Routes.Count > 0)//Si ya hay mostrada una ruta, la limpio (ejemplo: misma ruta con distinto color)
-                        MapControl.Routes.Clear();
+                    if (routeResult.Status == MapRouteFinderStatus.Success)
+                    {
+                        System.Text.StringBuilder routeInfo = new System.Text.StringBuilder();
 
-                    MapControl.Routes.Add(viewOfRoute);
+                        // Se muestra la información obtenida de la ruta
+                        routeInfo.Append("\nTiempo en minutos = " + routeResult.Route.EstimatedDuration.TotalMinutes.ToString());
+                        routeInfo.Append("\nTotal Km = " + (routeResult.Route.LengthInMeters / 1000).ToString());
 
-                    // Mostramos la ruta en el Mapa
-                    await MapControl.TrySetViewBoundsAsync(
-                          routeResult.Route.BoundingBox,
-                          null,
-                          Windows.UI.Xaml.Controls.Maps.MapAnimationKind.None);
+                        // Se muestra las direcciones de la ruta
+                        routeInfo.Append("\n\nDIRECCIONES\n");
+
+                        foreach (MapRouteLeg leg in routeResult.Route.Legs)
+                        {
+                            foreach (MapRouteManeuver maneuver in leg.Maneuvers)
+                            {
+                                routeInfo.AppendLine(maneuver.InstructionText);
+                                Debug.WriteLine(maneuver.InstructionText);
+                            }
+                        }
+
+                        // Mostramos la información de la ruta en el Texto asignado para ver las indicaciones de la ruta
+                        TextIndicacionesRuta.Text = routeInfo.ToString();
+
+                        // Usamos la ruta para inicializar MapRouteView
+                        MapRouteView viewOfRoute = new MapRouteView(routeResult.Route);
+                        viewOfRoute.RouteColor = colors[ColorsCombo.SelectedIndex];
+                        viewOfRoute.OutlineColor = Colors.Red;
+
+                        // Añadimos el nuevo MapRouteView a las rutas del Mapa
+                        if (MapControl.Routes.Count > 0)//Si ya hay mostrada una ruta, la limpio (ejemplo: misma ruta con distinto color)
+                            MapControl.Routes.Clear();
+
+                        MapControl.Routes.Add(viewOfRoute);
+
+                        // Mostramos la ruta en el Mapa
+                        await MapControl.TrySetViewBoundsAsync(
+                              routeResult.Route.BoundingBox,
+                              null,
+                              Windows.UI.Xaml.Controls.Maps.MapAnimationKind.None);
+                    }
+                    else
+                    {
+                        TextIndicacionesRuta.Text = "A ocurrido un problema al cargar el mapa: " + routeResult.Status.ToString();
+                    }
                 }
-                else
-                {
-                    TextIndicacionesRuta.Text = "A ocurrido un problema al cargar el mapa: " + routeResult.Status.ToString();
+                catch {
+                    TextIndicacionesRuta.Text = "Error obteniendo una de las posiciones especificadas (DIRECCIÓN NO ENCONTRADA)";
+                    Debug.WriteLine("Error haciendo obteniendo la posición de una dirección mediante Geocode (DIRECCIÓN NO ENCONTRADA) ");
                 }
             }
             else
@@ -311,7 +346,7 @@ namespace UWP_Mapa_Bing
             }
         }
 
-        private async Task<BasicGeoposition> geocodeButton(String addressToGeocode)
+        private async Task<BasicGeoposition> geocodeDireccion(String addressToGeocode)
         {
             // Se busca la dirección o lugar específicado, se establece un punto cercano como referencia (en este caso la ubicación inicial del usuario al ejecutar la App)
             MapLocationFinderResult result = await MapLocationFinder.FindLocationsAsync(
@@ -334,7 +369,9 @@ namespace UWP_Mapa_Bing
 
             return valor_retorno;
         }
+        #endregion
 
+        #region Click Posición Actual
         private async void click_PosActual(object sender, RoutedEventArgs e)
         {
             // Reverse geocode the specified geographic location.
@@ -348,6 +385,6 @@ namespace UWP_Mapa_Bing
                 text_Origen.Text = result.Locations[0].Address.Town + ", " + result.Locations[0].Address.Street + " " + result.Locations[0].Address.StreetNumber.ToString();
             }
         }
-
+        #endregion
     }
 }
