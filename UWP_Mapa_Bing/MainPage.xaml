@@ -172,15 +172,20 @@
 
         </StackPanel>
         <!--FIN Panel de Rutas-->
-
-        <TextBox Name="TextIndicacionesRuta"
-                   Grid.Row="0" Grid.Column="1"
-                     TextWrapping="Wrap"
-                     HorizontalAlignment="Left" 
-                     Margin="0,0,0,0"
-                     VerticalAlignment="Top" 
-                     Height="700" 
-                     Width="344"/>
-
+        <StackPanel x:Name="Panel_Info_Ruta" Grid.Row="0" Grid.Column="1">
+            <TextBox Text="Información de la Ruta"  
+                     BorderThickness="0"
+                     FontSize="25"
+                     HorizontalAlignment="Center"
+                     FontWeight="Bold"/>
+            <TextBox Name="TextIndicacionesRuta" 
+                         BorderThickness="0"
+                         TextWrapping="Wrap"
+                         HorizontalAlignment="Center" 
+                         Margin="0,0,0,0"
+                         VerticalAlignment="Top" 
+                         Height="700" 
+                         Width="344"/>
+        </StackPanel>
     </Grid>
 </Page>

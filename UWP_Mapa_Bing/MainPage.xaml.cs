@@ -56,6 +56,7 @@ namespace UWP_Mapa_Bing
             this.SizeChanged += MainPage_SizeChanged;
         }
 
+
         //Evento que controla el tamaño de la pantalla, para redimensionar los elementos que hay en ella. Como la App está diseñada para Tablets en modo Landscape, no controlo otras resoluciones. Pero si quisiera
         //ver la App con otros diseñis sin cargar otra Page, podríamos usar este evento para cargar diferentes VisualState u otras elementos que permitan mostrar
         //otro diseño creado en el mismo fichero XAML, para modificar la apariencia de la Page mostrada.
@@ -66,8 +67,8 @@ namespace UWP_Mapa_Bing
             double height = bounds.Height;
             double width = bounds.Width;
 
-            TextIndicacionesRuta.Width = width / 3;
-            TextIndicacionesRuta.Height = (height / 4) * 3;
+            Panel_Info_Ruta.Width = width / 3;
+            Panel_Info_Ruta.Height = (height / 4) * 3;
 
             Panel_Rutas.Height = (height / 4);
             Panel_Rutas.Width = (width / 3) * 2;
