@@ -142,6 +142,7 @@
                      FontSize="25"
                      HorizontalAlignment="Center"
                      FontWeight="Bold"/>
+            
             <TextBox Name="TextIndicacionesRuta" 
                          BorderThickness="0"
                          TextWrapping="Wrap"
@@ -162,7 +163,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Stretch">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <ComboBox x:Name="combo2d" ItemsSource="{x:Bind mapas2d}"/>
+                <ComboBox x:Name="combo2d" Width="140" ItemsSource="{x:Bind mapas2d}"/>
                 <Button Content="2D Map"
                     Name="butMapaNormal"
                     Click="click_MapaNormal"
@@ -174,7 +175,7 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <ComboBox x:Name="combo3d"  ItemsSource="{x:Bind mapas3d}"/>
+                <ComboBox x:Name="combo3d" Width="140" ItemsSource="{x:Bind mapas3d}"/>
                 <Button Content="3D Map"
                     Name="butTresD"
                     Click="map_tresD"

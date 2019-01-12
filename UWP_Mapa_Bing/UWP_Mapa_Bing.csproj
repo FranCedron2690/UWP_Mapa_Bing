@@ -107,6 +107,7 @@
     <None Include="UWP_Mapa_Bing_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\destinoPOI.png" />
     <Content Include="Assets\poi_position.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />

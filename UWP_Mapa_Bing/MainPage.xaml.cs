@@ -69,6 +69,45 @@ namespace UWP_Mapa_Bing
             this.Loaded += Page_Loaded;//evento lanzado cuando la pantalla ha sido cargada (posterior a la función Main)
         }
 
+        private async void ColocarPOIs(Geopoint posPOI, String textPOI, Boolean destino)
+        {
+            /*POIs: según la documentación de windows para UWP, se pueden añadir POI (Points Of Interest) al mapa. Ademas permite personalizar
+                     los POIs cambiando su imagen por defecto. Entre los tipos de POIs que se pueden añadir, están las imágenes (no confundir con
+                     personallizar la imagen dce un POI), objetos 3D, shapes (para señalizar zonas del mapa con imagenes personalizadas por nosotros)
+                     , lineas, y XAML (por ejemplo botones, tablas, CARDs, por ejemplo para mostrar una CARD con información y botones para realizar
+                     una acción sobre un sitio concreto) https://docs.microsoft.com/en-us/windows/uwp/maps-and-location/display-poi*/
+            var MyLandmarks = new List<MapElement>();
+
+
+            //Si no se especifíca la Altitud, la imagen del POI será colocada en la superficie
+            var newIcon = new MapIcon
+            {
+                Location = posPOI,//localización sobre la que se mostrará en el Mapa
+                NormalizedAnchorPoint = new Point(0.5, 1.0),//El punto de anclaje es el punto en el MapIcon que se coloca en el punto en el
+                                                            //MapControl especificado por la propiedad Ubicación (Posición 2D sobre el Mapa)
+                ZIndex = 0,//Layer
+                Title = textPOI//Si el título no se ve, es por el zoom del Mapa, tal cual dice la documentación
+            };
+
+            //Se recomienda un tamaño por debajo de los 100 px, ya que si no el POI será muy grande
+            if (destino == false)
+                newIcon.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/poi_position.png"));
+            else
+            {
+                newIcon.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/destinoPOI.png"));
+            }
+
+            MyLandmarks.Add(newIcon);
+
+            var LandmarksLayer = new MapElementsLayer
+            {
+                ZIndex = 1,
+                MapElements = MyLandmarks
+            };
+
+            MapControl.Layers.Add(LandmarksLayer);              
+        }
+
         #region Eventos
         //Evento llamado cuando la pantalla ha sido cargada. Lo uso para establecer el Index de los los combos de los mapas, ya que al añadir sus items del combo en la función Main, no se puede establecer
         //su index en ella porque su valor aun es null. Por ello, los establezco en esta función, que es llamada posteriormente
@@ -79,6 +118,7 @@ namespace UWP_Mapa_Bing
                                                              //de cada tipo de apariencia del mapa, para poder cambiarlos y crear nuestras propias apariencias https://docs.microsoft.com/en-us/windows/uwp/maps-and-location/elements-of-map-style-sheet
             combo2d.SelectedIndex = 1;
             combo3d.SelectedIndex = 0;
+            Debug.WriteLine(combo2d.Width + " " + combo3d.Width);
         }
 
         //Evento que controla el tamaño de la pantalla, para redimensionar los elementos que hay en ella. Como la App está diseñada para Tablets en modo Landscape, no controlo otras resoluciones. Pero si quisiera
@@ -118,6 +158,7 @@ namespace UWP_Mapa_Bing
                     geolocator.DesiredAccuracy = PositionAccuracy.High;
                     Geoposition pos = await geolocator.GetGeopositionAsync();
                     miPosiciónActual = pos.Coordinate.Point;
+                    //Un BasicGeoposition se compone de la Longitud y Latitud de un Point -> new BasicGeoposition { .Point.Position.Latitude, .Point.Position.Longitude}
 
                     // Coloco el mapa en la posición del usuario, y establezco sus valores iniciales
                     MapControl.Center = miPosiciónActual;
@@ -127,37 +168,8 @@ namespace UWP_Mapa_Bing
                     MapControl.DesiredPitch = 65;//Inclinación del mapa
                     //MapControl.TrafficFlowVisible = true;//Flujo de tráfico
                     //MapControl.PedestrianFeaturesVisible = true;//
-                    //MapControl.WatermarkMode = MapWatermarkMode.On;
 
-                    /*POIs: según la documentación de windows para UWP, se pueden añadir POI (Points Of Interest) al mapa. Ademas permite personalizar
-                     los POIs cambiando su imagen por defecto. Entre los tipos de POIs que se pueden añadir, están las imágenes (no confundir con
-                     personallizar la imagen dce un POI), objetos 3D, shapes (para señalizar zonas del mapa con imagenes personalizadas por nosotros)
-                     , lineas, y XAML (por ejemplo botones, tablas, CARDs, por ejemplo para mostrar una CARD con información y botones para realizar
-                     una acción sobre un sitio concreto) https://docs.microsoft.com/en-us/windows/uwp/maps-and-location/display-poi*/
-                    var MyLandmarks = new List<MapElement>();
-
-                    //Si no se especifíca la Altitud, la imagen del POI será colocada en la superficie
-                    var spaceNeedleIcon = new MapIcon
-                    {
-                        Location = miPosiciónActual,//localización sobre la que se mostrará en el Mapa
-                        NormalizedAnchorPoint = new Point(0.5, 1.0),//El punto de anclaje es el punto en el MapIcon que se coloca en el punto en el
-                        //MapControl especificado por la propiedad Ubicación (Posición 2D sobre el Mapa)
-                        ZIndex = 0,//Layer
-                        Title = "Posición Actual"//Si el título no se ve, es por el zoom del Mapa, tal cual dice la documentación
-                    };
-
-                    //Se recomienda un tamaño por debajo de los 100 px, ya que si no el POI será muy grande
-                    spaceNeedleIcon.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/poi_position.png"));
-
-                    MyLandmarks.Add(spaceNeedleIcon);
-
-                    var LandmarksLayer = new MapElementsLayer
-                    {
-                        ZIndex = 1,
-                        MapElements = MyLandmarks
-                    };
-
-                    MapControl.Layers.Add(LandmarksLayer);
+                    ColocarPOIs(miPosiciónActual, "Posición Actual", false);
                     break;
 
                 case GeolocationAccessStatus.Denied:
@@ -257,10 +269,10 @@ namespace UWP_Mapa_Bing
                 try
                 {
                     // Obtenemos la dirección inicial mediante Geocode
-                    BasicGeoposition startLocation = await geocodeDireccion(text_Origen.Text);
+                    Geopoint startLocation = await geocodeDireccion(text_Origen.Text);
 
                     // Obtenemos la dirección destino mediante Geocode
-                    BasicGeoposition endLocation = await geocodeDireccion(text_Destino.Text);
+                    Geopoint endLocation = await geocodeDireccion(text_Destino.Text);
 
                     MapRouteFinderResult routeResult = null;
 
@@ -268,8 +280,8 @@ namespace UWP_Mapa_Bing
                     {
                         // Para conseguir la ruta entre 2 destinos especificados Coche
                         routeResult = await MapRouteFinder.GetDrivingRouteAsync(
-                                      new Geopoint(startLocation),
-                                      new Geopoint(endLocation),
+                                      startLocation,
+                                      endLocation,
                                       MapRouteOptimization.Time,
                                       MapRouteRestrictions.None);
                     }
@@ -277,8 +289,8 @@ namespace UWP_Mapa_Bing
                     {
                         // Para conseguir la ruta entre 2 destinos especificados Andando. Suele Fallar
                         routeResult = await MapRouteFinder.GetWalkingRouteAsync(
-                                      new Geopoint(startLocation),
-                                      new Geopoint(endLocation));
+                                     startLocation,
+                                      endLocation);
                     }
 
 
@@ -288,7 +300,8 @@ namespace UWP_Mapa_Bing
                         System.Text.StringBuilder routeInfo = new System.Text.StringBuilder();
 
                         // Se muestra la información obtenida de la ruta
-                        routeInfo.Append("\nTiempo en minutos = " + routeResult.Route.EstimatedDuration.TotalMinutes.ToString());
+                        string tiempo = string.Format("{0} horas {1} min", routeResult.Route.EstimatedDuration.Hours, routeResult.Route.EstimatedDuration.Minutes);
+                        routeInfo.Append("\nTiempo en minutos = " + tiempo);
                         routeInfo.Append("\nTotal Km = " + (routeResult.Route.LengthInMeters / 1000).ToString());
 
                         // Se muestra las direcciones de la ruta
@@ -322,6 +335,10 @@ namespace UWP_Mapa_Bing
                               routeResult.Route.BoundingBox,
                               null,
                               Windows.UI.Xaml.Controls.Maps.MapAnimationKind.None);
+
+                        //Coloco los POIs de Inicio y Destino
+                        ColocarPOIs(endLocation, "Destino", true);
+                        ColocarPOIs(startLocation, "Inicio", true);
                     }
                     else
                     {
@@ -346,7 +363,7 @@ namespace UWP_Mapa_Bing
             }
         }
 
-        private async Task<BasicGeoposition> geocodeDireccion(String addressToGeocode)
+        private async Task<Geopoint> geocodeDireccion(String addressToGeocode)
         {
             // Se busca la dirección o lugar específicado, se establece un punto cercano como referencia (en este caso la ubicación inicial del usuario al ejecutar la App)
             MapLocationFinderResult result = await MapLocationFinder.FindLocationsAsync(
@@ -363,10 +380,8 @@ namespace UWP_Mapa_Bing
                     Debug.WriteLine("No ha encontrado nada el Geocode");               
             }
 
-            BasicGeoposition valor_retorno = new BasicGeoposition();
-            valor_retorno.Latitude = result.Locations[0].Point.Position.Latitude;
-            valor_retorno.Longitude = result.Locations[0].Point.Position.Longitude;
-
+            Geopoint valor_retorno = result.Locations[0].Point;
+         
             return valor_retorno;
         }
         #endregion
