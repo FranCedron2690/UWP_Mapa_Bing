@@ -21,6 +21,10 @@ using Windows.UI;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 
+/*Repositorio GitHub
+ https://github.com/FranCedron2690/UWP_Mapa_Bing
+ */
+
 namespace UWP_Mapa_Bing
 {
     /// <summary>
